@@ -1,18 +1,21 @@
-FROM node:lts-buster
+FROM node:20-bookworm-slim
 
-RUN apt-get update && \
-  apt-get install -y \
-  ffmpeg \
-  imagemagick \
-  webp && \
-  apt-get upgrade -y && \
-  npm i pm2 -g && \
-  rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y \
+    imagemagick \
+    webp \
+    ffmpeg \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY package.json .
+WORKDIR /app
 
-RUN yarn install
+COPY package*.json ./
+
+RUN npm cache clean --force && \
+    npm install --legacy-peer-deps
 
 COPY . .
 
-CMD ["pm2-runtime", "."]
+EXPOSE 3000
+
+CMD ["npm", "start"]
